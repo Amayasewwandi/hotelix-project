@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Hotelix</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css?v=2">
+</head>
+<body class="login-page-body">
+
+    <!-- Header -->
+    <header class="main-header scrolled">
+        <div class="logo" onclick="window.location.href='index.html'">
+            <svg class="logo-svg" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 75,20 L 75,70 M 67,20 L 83,20 M 67,70 L 83,70" stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="square"/>
+                <path d="M 125,20 L 125,70 M 117,20 L 133,20 M 117,70 L 133,70" stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="square"/>
+                <path d="M 72,50 C 90,32 110,68 135,40" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/>
+                <path d="M 134,32 A 8,8 0 0,1 142,40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                <path d="M 134,24 A 16,16 0 0,1 150,40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                <text x="100" y="98" font-family="'Playfair Display', Georgia, serif" font-weight="700" font-size="20" fill="currentColor" text-anchor="middle" letter-spacing="4">HOTELIX</text>
+            </svg>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html#hero">Home</a>
+            <a href="index.html#about">About Us</a>
+            <a href="index.html#rooms">Rooms</a>
+            <a href="index.html#services">Services</a>
+            <a href="index.html#contact">Contact</a>
+            <a href="login.html" class="login-btn">Login</a>
+        </nav>
+    </header>
+
+    <!-- Centered Standalone Login Card -->
+    <div class="login-standalone-container">
+        <div class="login-container-card">
+            <div class="login-content-box">
+                <h2 class="login-welcome-title">Welcome Back!</h2>
+                <p class="login-welcome-desc">Login to access your bookings and manage your stay</p>
+
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="login-role">Select Role <i class="fa-solid fa-circle-question"></i></label>
+                        <select id="login-role" class="login-input-field" required>
+                            <option value="guest" selected>Guest</option>
+                            <option value="staff">Staff</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-email">Email Address</label>
+                        <input type="email" id="login-email" class="login-input-field" placeholder="guest@hotelix.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" class="login-input-field" placeholder="••••••••" required>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="remember-me">
+                            <span class="checkmark"></span>
+                            Remember me
+                        </label>
+                        <a href="javascript:void(0)" class="forgot-password" onclick="alert('Forgot password functionality simulated.')">Forgot Password?</a>
+                    </div>
+
+                    <div class="login-footer-actions">
+                        <button type="submit" class="btn-login-submit">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <div id="feedback-alert-modal" class="popup-modal modal-hidden">
+        <div class="modal-card feedback-card">
+            <div class="feedback-icon-circle">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <p class="feedback-message" id="feedback-alert-message">Action Successful!</p>
+            <button class="btn-feedback-action" id="feedback-alert-action-btn" onclick="closeFeedbackAlert()">Close</button>
+        </div>
+    </div>
+
+    <!-- Main JavaScript Controller -->
+    <script src="app.js"></script>
+</body>
+</html>
+```[cite: 13, 17]
+

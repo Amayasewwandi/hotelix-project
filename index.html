@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotelix - Smart Hotel Management System</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css?v=2">
+</head>
+
+<body>
+
+    <!-- ==================== HEADER / NAVIGATION ==================== -->
+    <header id="main-header" class="main-header">
+        <div class="logo" onclick="window.location.href='index.html'">
+            <svg class="logo-svg" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 75,20 L 75,70 M 67,20 L 83,20 M 67,70 L 83,70" stroke="currentColor" stroke-width="5"
+                    fill="none" stroke-linecap="square" />
+                <path d="M 125,20 L 125,70 M 117,20 L 133,20 M 117,70 L 133,70" stroke="currentColor" stroke-width="5"
+                    fill="none" stroke-linecap="square" />
+                <path d="M 72,50 C 90,32 110,68 135,40" fill="none" stroke="currentColor" stroke-width="4.5"
+                    stroke-linecap="round" />
+                <path d="M 134,32 A 8,8 0 0,1 142,40" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" />
+                <path d="M 134,24 A 16,16 0 0,1 150,40" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" />
+                <text x="100" y="98" font-family="'Playfair Display', Georgia, serif" font-weight="700" font-size="20"
+                    fill="currentColor" text-anchor="middle" letter-spacing="4">HOTELIX</text>
+            </svg>
+        </div>
+        <nav class="nav-links">
+            <a href="#hero" class="active-link" onclick="scrollToSection('hero')">Home</a>
+            <a href="#about" onclick="scrollToSection('about')">About Us</a>
+            <a href="#rooms" onclick="scrollToSection('rooms')">Rooms</a>
+            <a href="#services" onclick="scrollToSection('services')">Services</a>
+            <a href="#gallery" onclick="scrollToSection('gallery')">Gallery</a>
+            <a href="#contact" onclick="scrollToSection('contact')">Contact</a>
+            <!-- Login Link -->
+            <a href="login.html" class="login-btn" onclick="localStorage.clear()">Login</a>
+        </nav>
+        <button class="mobile-menu-toggle" aria-label="Toggle Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- ==================== PUBLIC LANDING PAGE CONTENT ==================== -->
+    <div id="landing-page-view">
+
+        <!-- Hero Section -->
+        <section id="hero" class="hero-section">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <p class="hero-pretitle">Check Availability</p>
+
+                <!-- Availability Booking Bar -->
+                <div class="booking-bar">
+                    <div class="bar-field">
+                        <label for="check-in-date">Check In</label>
+                        <input type="date" id="check-in-date">
+                    </div>
+                    <div class="bar-field">
+                        <label for="check-out-date">Check Out</label>
+                        <input type="date" id="check-out-date">
+                    </div>
+                    <div class="bar-field">
+                        <label for="guests-count">Guests</label>
+                        <select id="guests-count">
+                            <option value="1">1 Guest</option>
+                            <option value="2" selected>2 Guests</option>
+                            <option value="3">3 Guests</option>
+                            <option value="4">4 Guests</option>
+                            <option value="5+">5+ Guests</option>
+                        </select>
+                    </div>
+                    <button class="search-btn" onclick="searchAvailability()">Search</button>
+                </div>
+
+                <h1 class="hero-title">Welcome to Hotelix</h1>
+                <p class="hero-subtitle">Experience luxury and comfort</p>
+                <button class="book-now-hero" onclick="scrollToSection('rooms')">Book Now</button>
+            </div>
+        </section>
+
+        <!-- About Us Section -->
+        <section id="about" class="about-section">
+            <div class="about-bg-overlay"></div>
+            <div class="container">
+                <div class="glass-card about-glass-card">
+                    <h2 class="about-title">Welcome to Hotelix</h2>
+                    <p class="about-description">
+                        Welcome to Hotelix, your ultimate destination for luxury, comfort, and seamless hospitality.
+                        Nestled in a breathtaking tropical paradise, we combine world-class modern amenities with warm,
+                        personalized service to ensure every guest enjoys an unforgettable stay.
+                    </p>
+
+                    <h3 class="about-subtitle">Our Vision & Mission</h3>
+                    <p class="about-description">
+                        Our mission is to redefine modern hospitality by offering an effortless, high-end experience
+                        from the moment you arrive. Whether you are here for a relaxing beach vacation, a romantic
+                        getaway, or a business trip, Hotelix is dedicated to making your stay as comfortable and
+                        stress-free as possible.
+                    </p>
+
+                    <h3 class="about-why-title">Why Choose Hotelix?</h3>
+                    <ul class="about-features-list">
+                        <li>
+                            <i class="fa-solid fa-star gold-star"></i>
+                            <strong>Stunning Location:</strong> Situated right by pristine, sun-kissed beaches with
+                            mesmerizing ocean views.
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-star gold-star"></i>
+                            <strong>Luxurious Accommodation:</strong> Elegantly designed rooms and suites equipped with
+                            modern comforts (Wi-Fi, AC, smart entertainment, and more).
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-star gold-star"></i>
+                            <strong>Smart Booking Experience:</strong> An advanced, user-friendly reservation system
+                            that makes booking your dream room quick and hassle-free.
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-star gold-star"></i>
+                            <strong>Exceptional Service:</strong> Dedicated 24/7 guest support and top-tier hospitality
+                            tailored to your every need.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rooms Section (10 Rooms Catalogue with Mapped IDs) -->
+        <section id="rooms" class="rooms-section">
+            <div class="container">
+                <h2 class="section-title">Our Luxurious Rooms</h2>
+                <p class="section-subtitle">Discover comfort, elegance, and breathtaking views designed for your ultimate relaxation</p>
+
+                <!-- Rooms Grid -->
+                <div class="rooms-grid">
+
+                    <!-- 1. Deluxe Ocean View (Room ID: 1) -->
+                    <div class="room-card highlight-card">
+                        <div class="room-img-container">
+                            <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=800"
+                                alt="Deluxe Ocean View" class="room-img">
+                            <div class="room-tag">Best Seller</div>
+                        </div>
+                        <div class="room-details">
+                            <h3 class="room-name">Deluxe Ocean View</h3>
+                            <p class="room-desc">Spacious room with a private balcony overlooking the pristine ocean view.</p>
+                            <p class="room-amenities">Amenities: Free Wi-Fi, AC, King Bed, Smart TV</p>
+                            <div class="room-footer">
+                                <span class="room-price">$150 <span class="per-night">/ night</span></span>
+                                <button class="btn-book-room" onclick="initiateBooking(1, 'Deluxe Ocean View', 150)">Book Now</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Executive Suite (Room ID: 2) -->
+                    <div class="room-card">
+                        <div class="room-img-container">
+                            <img src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&q=80&w=800"
+                                alt="Executive Suite" class="room-img">
+                        </div>
+                        <div class="room-details">
+                            <h3 class="room-name">Executive Suite</h3>
+                            <p class="room-desc">Premium suite featuring a separate living area, luxury bath, and panoramic views.</p>
+                            <p class="room-amenities">Amenities: Free Wi-Fi, AC, King Bed, Mini Bar</p>
+                            <div class="room-footer">
+                                <span class="room-price">$250 <span class="per-night">/ night</span></span>
+                                <button class="btn-book-room" onclick="initiateBooking(2, 'Executive Suite', 250)">Book Now</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Standard Garden Room (Room ID: 3) -->
+                    <div class="room-card">
+                        <div class="room-img-container">
+                            <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=800"
+                                alt="Standard Garden Room" class="room-img">
+                        </div>
+                        <div class="room-details">
+                            <h3 class="room-name">Standard Garden Room</h3>
+                            <p class="room-desc">Cosy and modern room surrounded by lush green gardens.</p>
+                            <p class="room-amenities">Amenities: Free Wi-Fi, AC, Queen Bed, Coffee Maker</p>
+                            <div class="room-footer">
+                                <span class="room-price">$100 <span class="per-night">/ night</span></span>
+                                <button class="btn-book-room" onclick="initiateBooking(3, 'Standard Garden Room', 100)">Book Now</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Superior Twin Room (Room ID: 4) -->
+                    <div class="room-card">
+                        <div class="room-img-container">
+                            <img src="https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&q=80&w=800"
+                                alt="Superior Twin Room" class="room-img">
+                        </div>
+                        <div class="room-details">
+                            <h3 class="room-name">Superior Twin Room</h3>
+                            <p class="room-desc">Comfortable twin beds with modern amenities and city view.</p>
+                            <p class="room-amenities">Amenities: Free Wi-Fi, AC, Twin Beds, TV</p>
+                            <div class="room-footer">
+                                <span class="room-price">$120 <span class="per-night">/ night</span></span>
+                                <button class="btn-book-room" onclick="initiateBooking(4, 'Superior Twin Room', 120)">Book Now</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Family Suite (Room ID: 5) -->
+                    <div class="room-card">
+                        <div class="room-img-container">
+                            <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&q=80&w=800"
+                                alt="Family Suite" class="room-img">
+                        </div>
+                        <div class="room-details">
+                            <h3 class="room-name">Family Suite</h3>
+                            <p class="room-desc">Ideal for families, featuring two connected bedrooms and a spacious lounge.</p>
+                            <p class="room-amenities">Amenities: Free Wi-Fi, AC, 2 Queen Beds, Kitchenette</p>
+                            <div class="room-footer">
+                                <span class="room-price">$300 <span class="per-night">/ night</span></span>
+                                <button class="btn-book-room" onclick="initiateBooking(5, 'Family Suite', 300)">Book Now</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. Presidential Suite (Room ID: 6) -->
+                    <div class="room-card highlight-card">
+                        <div class="room-img-container">
+                            <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800"
+                                alt="Presidential Suite" class="room-img">
+                            <div class="room-tag">Luxury</div>
+                        </div>
+                        <div class="room-details">
+                            <h3 class="room-name">Presidential Suite</h3>
+                            <p class="room-desc">The ultimate luxury experience with private pool, butler service, and elite views.</p>
+                            <p class="room-amenities">Amenities: Free Wi-Fi, AC, King Bed, Private Pool, Butler</p>
+                            <div class="room-footer">
+                                <span class="room-price">$500 <span class="per-night">/ night</span></span>
+                                <button class="btn-book-room" onclick="initiateBooking(6, 'Presidential Suite', 500)">Book Now</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. Overwater Villa (Room ID: 7) -->
+                    <div class="room-card">
+                        <div class="room-img-container">
+                            <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=800"
+                                alt="Overwater Villa" class="room-img">
+                        </div>
+                        <div class="room-details">
+                            <h3 class="room-name">Overwater Villa</h3>
+                            <p class="room-desc">Stunning villa built over crystal clear waters with direct sea access.</p>
+                            <p class="room-amenities">Amenities: Free Wi-Fi, AC, King Bed, Sun Deck, Ocean Access</p>
+                            <div class="room-footer">
+                                <span class="room-price">$350 <span class="per-night">/ night</span></span>
+                                <button class="btn-book-room" onclick="initiateBooking(7, 'Overwater Villa', 350)">Book Now</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 8. Penthouse Suite (Room ID: 8) -->
+                    <div class="room-card">
+                        <div class="room-img-container">
+                            <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=800"
+                                alt="Penthouse Suite" class="room-img">
+                        </div>
+                        <div class="room-details">
+                            <h3 class="room-name">Penthouse Suite</h3>
+                            <p class="room-desc">Top-floor penthouse offering 360-degree skyline views and premium furnishings.</p>
+                            <p class="room-amenities">Amenities: Free Wi-Fi, AC, King Bed, Terrace, Jacuzzi</p>
+                            <div class="room-footer">
+                                <span class="room-price">$450 <span class="per-night">/ night</span></span>
+                                <button class="btn-book-room" onclick="initiateBooking(8, 'Penthouse Suite', 450)">Book Now</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 9. Cozy Garden Studio (Room ID: 9) -->
+                    <div class="room-card">
+                        <div class="room-img-container">
+                            <img src="https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&q=80&w=800"
+                                alt="Cozy Garden Studio" class="room-img">
+                        </div>
+                        <div class="room-details">
+                            <h3 class="room-name">Cozy Garden Studio</h3>
+                            <p class="room-desc">A peaceful retreat nestled right next to the botanical gardens.</p>
+                            <p class="room-amenities">Amenities: Free Wi-Fi, AC, Queen Bed, Patio</p>
+                            <div class="room-footer">
+                                <span class="room-price">$90 <span class="per-night">/ night</span></span>
+                                <button class="btn-book-room" onclick="initiateBooking(9, 'Cozy Garden Studio', 90)">Book Now</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 10. Deluxe Double Room (Room ID: 10) -->
+                    <div class="room-card">
+                        <div class="room-img-container">
+                            <img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&q=80&w=800"
+                                alt="Deluxe Double Room" class="room-img">
+                        </div>
+                        <div class="room-details">
+                            <h3 class="room-name">Deluxe Double Room</h3>
+                            <p class="room-desc">Modern room with two double beds, perfect for friends or colleagues traveling together.</p>
+                            <p class="room-amenities">Amenities: Free Wi-Fi, AC, 2 Double Beds, Work Desk</p>
+                            <div class="room-footer">
+                                <span class="room-price">$130 <span class="per-night">/ night</span></span>
+                                <button class="btn-book-room" onclick="initiateBooking(10, 'Deluxe Double Room', 130)">Book Now</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="services-section">
+            <div class="container">
+                <h2 class="section-title">Our Exclusive Services</h2>
+                <p class="section-subtitle">Experience world-class hospitality and top-tier amenities tailored to make
+                    your stay extraordinary</p>
+
+                <div class="services-content">
+                    <div class="services-left">
+                        <img src="https://images.unsplash.com/photo-1485217988980-11786ced9454?auto=format&fit=crop&q=80&w=800"
+                            alt="Exclusive Service Bellboy" class="services-hero-img">
+                    </div>
+                    <div class="services-right">
+                        <ol class="services-list">
+                            <li>
+                                <h4>Luxury Spa & Wellness</h4>
+                                <p>Relax your mind and body with our professional therapeutic treatments, massages, and
+                                    wellness packages.</p>
+                            </li>
+                            <li>
+                                <h4>Swimming Pool & Bar</h4>
+                                <p>Dive into our pool with breathtaking views while enjoying refreshing tropical
+                                    cocktails at the poolside bar.</p>
+                            </li>
+                            <li>
+                                <h4>Fine Dining Restaurant</h4>
+                                <p>Savor exquisite local and international culinary masterpieces prepared by our
+                                    world-class master chefs.</p>
+                            </li>
+                            <li>
+                                <h4>24/7 Airport Transfer</h4>
+                                <p>Enjoy a hassle-free journey with our reliable, private pick-up and drop-off services
+                                    right from the airport.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hotel Gallery Section with Lightbox Preview -->
+        <section id="gallery" class="section-container" style="padding: 60px 20px; background-color: #f9f9f9;">
+            <div class="container">
+                <div class="section-header" style="text-align: center; margin-bottom: 40px;">
+                    <h2 style="font-family: 'Playfair Display', serif; font-size: 2.2rem; margin-bottom: 10px;">Explore Hotelix Resort</h2>
+                    <p style="color: #666; font-size: 1.05rem;">Click any photo to view it in full screen.</p>
+                </div>
+
+                <div class="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px;">
+                    <!-- Gallery Item 1 -->
+                    <div class="gallery-card" onclick="openLightbox('https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80&w=1200', 'Infinity Swimming Pool')" style="background: #fff; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.3s ease;">
+                        <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80&w=800" alt="Infinity Pool" style="width: 100%; height: 230px; object-fit: cover;">
+                        <div style="padding: 18px;">
+                            <h4 style="margin: 0 0 6px 0; font-size: 1.15rem;">Infinity Swimming Pool</h4>
+                            <p style="margin: 0; color: #666; font-size: 0.9rem;">Panoramic ocean view pool with private sunset deck.</p>
+                        </div>
+                    </div>
+
+                    <!-- Gallery Item 2 -->
+                    <div class="gallery-card" onclick="openLightbox('https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&q=80&w=1200', 'Wellness Spa & Sauna')" style="background: #fff; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.3s ease;">
+                        <img src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&q=80&w=800" alt="Wellness Spa" style="width: 100%; height: 230px; object-fit: cover;">
+                        <div style="padding: 18px;">
+                            <h4 style="margin: 0 0 6px 0; font-size: 1.15rem;">Wellness Spa & Sauna</h4>
+                            <p style="margin: 0; color: #666; font-size: 0.9rem;">Relaxing Ayurvedic treatments and therapeutic massages.</p>
+                        </div>
+                    </div>
+
+                    <!-- Gallery Item 3 -->
+                    <div class="gallery-card" onclick="openLightbox('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1200', 'Fine Dining Restaurant')" style="background: #fff; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.3s ease;">
+                        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800" alt="Fine Dining" style="width: 100%; height: 230px; object-fit: cover;">
+                        <div style="padding: 18px;">
+                            <h4 style="margin: 0 0 6px 0; font-size: 1.15rem;">Fine Dining Restaurant</h4>
+                            <p style="margin: 0; color: #666; font-size: 0.9rem;">Multi-cuisine gourmet dining prepared by international chefs.</p>
+                        </div>
+                    </div>
+
+                    <!-- Gallery Item 4 -->
+                    <div class="gallery-card" onclick="openLightbox('https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=1200', 'Private Beach Lounge')" style="background: #fff; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.3s ease;">
+                        <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=800" alt="Private Beach" style="width: 100%; height: 230px; object-fit: cover;">
+                        <div style="padding: 18px;">
+                            <h4 style="margin: 0 0 6px 0; font-size: 1.15rem;">Private Beach Lounge</h4>
+                            <p style="margin: 0; color: #666; font-size: 0.9rem;">Exclusive beachfront loungers with instant cocktail service.</p>
+                        </div>
+                    </div>
+
+                    <!-- Gallery Item 5 -->
+                    <div class="gallery-card" onclick="openLightbox('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=1200', '24/7 Fitness Center')" style="background: #fff; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.3s ease;">
+                        <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=800" alt="Fitness Center" style="width: 100%; height: 230px; object-fit: cover;">
+                        <div style="padding: 18px;">
+                            <h4 style="margin: 0 0 6px 0; font-size: 1.15rem;">24/7 Fitness Center</h4>
+                            <p style="margin: 0; color: #666; font-size: 0.9rem;">Fully equipped modern gym available for all staying guests.</p>
+                        </div>
+                    </div>
+
+                    <!-- Gallery Item 6 -->
+                    <div class="gallery-card" onclick="openLightbox('https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1200', 'Grand Event Ballroom')" style="background: #fff; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.3s ease;">
+                        <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=800" alt="Grand Ballroom" style="width: 100%; height: 230px; object-fit: cover;">
+                        <div style="padding: 18px;">
+                            <h4 style="margin: 0 0 6px 0; font-size: 1.15rem;">Grand Event Ballroom</h4>
+                            <p style="margin: 0; color: #666; font-size: 0.9rem;">Luxury venue tailored for weddings, corporate events, and galas.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact-section">
+            <div class="container">
+                <div class="contact-grid">
+                    <div class="contact-info-panel">
+                        <h2 class="contact-title">Get in Touch With Us</h2>
+                        <p class="contact-subtitle">Have any questions or special requests? Reach out to us and we'll
+                            get back to you shortly</p>
+
+                        <ul class="contact-details-list">
+                            <li>
+                                <i class="fa-solid fa-phone contact-icon"></i>
+                                <span>Phone: +94 77 123 4567</span>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-envelope contact-icon"></i>
+                                <span>Email: info@hotelmanagement.com</span>
+                            </li>
+                            <li>
+                                <i class="fa-solid fa-location-dot contact-icon"></i>
+                                <span>Address: Colombo, Sri Lanka</span>
+                            </li>
+                        </ul>
+
+                        <!-- Message Form inside Contact Section -->
+                        <form id="contact-form" onsubmit="handleContactSubmit(event)" class="contact-form-inline">
+                            <input type="text" placeholder="Your Name" required class="contact-input">
+                            <input type="email" placeholder="Email Address" required class="contact-input">
+                            <textarea placeholder="Your Message" required class="contact-textarea" rows="3"></textarea>
+                            <button type="submit" class="btn-send-message">Send Message</button>
+                        </form>
+                    </div>
+
+                    <div class="contact-image-panel">
+                        <div class="circle-image-wrapper">
+                            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=800"
+                                alt="Reception Contact" class="contact-circle-img">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="site-footer">
+            <p>&copy; 2026 Hotelix Smart Hotel Management. All rights reserved.</p>
+        </footer>
+
+    </div>
+
+    <!-- ==================== DIALOGS, MODALS & FEEDBACK POPUPS ==================== -->
+
+    <!-- Dynamic Room Detail / Booking Prompt -->
+    <div id="booking-prompt-modal" class="popup-modal modal-hidden">
+        <div class="modal-card">
+            <button class="close-modal-btn" onclick="closeBookingPromptModal()">&times;</button>
+            <h3 class="modal-title">Complete Your Booking</h3>
+            <p class="modal-desc" id="booking-modal-subtitle">You are booking: <strong id="booking-modal-room">Deluxe
+                    Ocean View</strong></p>
+
+            <form id="booking-details-form" onsubmit="processRoomBooking(event)">
+                <div class="form-group">
+                    <label for="booking-guest-name">Guest Name</label>
+                    <input type="text" id="booking-guest-name" class="modal-input" placeholder="Enter full name"
+                        required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="booking-checkin">Check-in Date</label>
+                        <input type="date" id="booking-checkin" class="modal-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="booking-checkout">Check-out Date</label>
+                        <input type="date" id="booking-checkout" class="modal-input" required>
+                    </div>
+                </div>
+                <div class="booking-price-summary">
+                    <span>Total Amount due:</span>
+                    <strong id="booking-modal-price-calc">$0</strong>
+                </div>
+                <button type="submit" class="btn-confirm-payment">Confirm & Pay</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Feedback Message Alert Modal -->
+    <div id="feedback-alert-modal" class="popup-modal modal-hidden">
+        <div class="modal-card feedback-card">
+            <div class="feedback-icon-circle">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <p class="feedback-message" id="feedback-alert-message">Action Successful!</p>
+            <button class="btn-feedback-action" id="feedback-alert-action-btn" onclick="closeFeedbackAlert()">Go
+                Back</button>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal for Gallery Preview -->
+    <div id="gallery-lightbox-modal" class="popup-modal modal-hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 9999;">
+        <div style="position: relative; max-width: 90%; max-height: 90%; text-align: center;">
+            <button onclick="closeLightbox()" style="position: absolute; top: -45px; right: 0; background: none; border: none; color: #fff; font-size: 2.5rem; cursor: pointer;">&times;</button>
+            <img id="lightbox-img" src="" alt="Zoomed Preview" style="max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.5);">
+            <p id="lightbox-caption" style="color: #fff; margin-top: 15px; font-size: 1.2rem; font-family: 'Playfair Display', serif;"></p>
+        </div>
+    </div>
+
+    <script>
+        function openLightbox(imgSrc, captionText) {
+            const modal = document.getElementById('gallery-lightbox-modal');
+            const img = document.getElementById('lightbox-img');
+            const caption = document.getElementById('lightbox-caption');
+            if (modal && img && caption) {
+                img.src = imgSrc;
+                caption.innerText = captionText;
+                modal.classList.remove('modal-hidden');
+            }
+        }
+
+        function closeLightbox() {
+            const modal = document.getElementById('gallery-lightbox-modal');
+            if (modal) {
+                modal.classList.add('modal-hidden');
+            }
+        }
+    </script>
+
+    <!-- Core Script Logic -->
+    <script src="app.js?v=2"></script>
+</body>
+
+</html>

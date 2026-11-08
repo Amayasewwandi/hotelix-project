@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Hotelix</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css?v=2">
+</head>
+<body class="dashboard-page-body admin-body">
+
+    <!-- Admin Header -->
+    <header class="dashboard-header admin-theme-header">
+        <div class="logo" onclick="window.location.href='index.html'">
+            <svg class="logo-svg" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 75,20 L 75,70 M 67,20 L 83,20 M 67,70 L 83,70" stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="square"/>
+                <path d="M 125,20 L 125,70 M 117,20 L 133,20 M 117,70 L 133,70" stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="square"/>
+                <path d="M 72,50 C 90,32 110,68 135,40" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/>
+                <path d="M 134,32 A 8,8 0 0,1 142,40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                <path d="M 134,24 A 16,16 0 0,1 150,40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                <text x="100" y="98" font-family="'Playfair Display', Georgia, serif" font-weight="700" font-size="20" fill="currentColor" text-anchor="middle" letter-spacing="4">HOTELIX</text>
+            </svg>
+        </div>
+        <div class="header-right">
+            <span class="welcome-msg">Welcome, Admin!</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </header>
+
+    <!-- Admin Dashboard Sub-Navigation Tabs -->
+    <div class="dashboard-nav-tabs admin-nav-tabs">
+        <button id="tab-admin-dashboard" class="tab-btn active-tab-btn" onclick="switchAdminTab('dashboard')">Dashboard</button>
+        <button id="tab-admin-rooms" class="tab-btn" onclick="switchAdminTab('rooms')">Rooms Management</button>
+        <button id="tab-admin-staff" class="tab-btn" onclick="switchAdminTab('staff')">Service Requests</button>
+        <button id="tab-admin-bookings" class="tab-btn" onclick="switchAdminTab('bookings')">All Bookings</button>
+    </div>
+
+    <div class="container dashboard-container">
+        
+        <!-- 1. ADMIN DASHBOARD STATS & RECENT BOOKINGS -->
+        <div id="panel-admin-dashboard" class="dashboard-panel">
+            <div class="admin-welcome-hero">
+                <h2>"Welcome, Admin!"</h2>
+            </div>
+
+            <!-- Stats Pills -->
+            <div class="stats-pills-row">
+                <div class="stat-pill">
+                    <span class="stat-label">Total Bookings</span>
+                    <strong class="stat-value" id="stat-total-bookings">124</strong>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-label">Total Revenue</span>
+                    <strong class="stat-value" id="stat-total-revenue">$24,800</strong>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-label">Active Guests</span>
+                    <strong class="stat-value" id="stat-active-guests">48</strong>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-label">Available Rooms</span>
+                    <strong class="stat-value" id="stat-available-rooms">12</strong>
+                </div>
+            </div>
+
+            <!-- Recent Bookings Table -->
+            <div class="card-section-container">
+                <h3 class="panel-section-title">Recent Bookings</h3>
+                <div class="table-responsive">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Guest Name</th>
+                                <th>Room Type</th>
+                                <th>Check-in</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-recent-bookings-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. ROOMS MANAGEMENT PANEL -->
+        <div id="panel-admin-rooms" class="dashboard-panel panel-hidden">
+            <div class="panel-header-actions">
+                <h2 class="panel-title">Rooms Management</h2>
+                <button class="btn-admin-action" onclick="openAddRoomModal()"><i class="fa-solid fa-plus"></i> Add New</button>
+            </div>
+
+            <div class="card-section-container">
+                <div class="table-responsive">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Room No</th>
+                                <th>Room Type</th>
+                                <th>Price / Night</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-rooms-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. SERVICE REQUESTS PANEL -->
+        <div id="panel-admin-staff" class="dashboard-panel panel-hidden">
+            <div class="panel-header-actions">
+                <h2 class="panel-title">Guest Service Requests</h2>
+                <button class="btn-admin-action" onclick="openAddStaffModal()"><i class="fa-solid fa-plus"></i> Add Service</button>
+            </div>
+
+            <div class="card-section-container">
+                <div class="table-responsive">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Guest ID</th>
+                                <th>Service Type</th>
+                                <th>Details / Info</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-staff-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. ALL BOOKINGS PANEL -->
+        <div id="panel-admin-bookings" class="dashboard-panel panel-hidden">
+            <div class="panel-header-actions">
+                <h2 class="panel-title">All Bookings</h2>
+            </div>
+
+            <div class="card-section-container">
+                <div class="table-responsive">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Guest Name</th>
+                                <th>Room Type</th>
+                                <th>Check-in</th>
+                                <th>Check-out</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-bookings-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ==================== CRUD MODALS ==================== -->
+
+    <!-- Add/Edit Room Modal -->
+    <div id="admin-room-modal" class="popup-modal modal-hidden">
+        <div class="modal-card">
+            <button class="close-modal-btn" onclick="closeRoomModal()">&times;</button>
+            <h3 class="modal-title" id="room-modal-title">Add New Room</h3>
+            <form id="admin-room-form" onsubmit="handleRoomSave(event)">
+                <input type="hidden" id="edit-room-index">
+                <div class="form-group">
+                    <label for="room-form-no">Room Number</label>
+                    <input type="text" id="room-form-no" class="modal-input" placeholder="e.g. 104" required>
+                </div>
+                <div class="form-group">
+                    <label for="room-form-type">Room Type</label>
+                    <select id="room-form-type" class="modal-input" required>
+                        <option value="Deluxe Ocean View">Deluxe Ocean View</option>
+                        <option value="Executive Suite">Executive Suite</option>
+                        <option value="Standard Garden Room">Standard Garden Room</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="room-form-price">Price / Night ($)</label>
+                    <input type="number" id="room-form-price" class="modal-input" placeholder="e.g. 150" required>
+                </div>
+                <div class="form-group">
+                    <label for="room-form-status">Status</label>
+                    <select id="room-form-status" class="modal-input" required>
+                        <option value="Available">Available</option>
+                        <option value="Booked">Booked</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-confirm-payment">Save Room</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Service Request Modal -->
+    <div id="admin-staff-modal" class="popup-modal modal-hidden">
+        <div class="modal-card">
+            <button class="close-modal-btn" onclick="closeStaffModal()">&times;</button>
+            <h3 class="modal-title" id="staff-modal-title">Manage Service Request</h3>
+            <form id="admin-staff-form" onsubmit="handleStaffSave(event)">
+                <input type="hidden" id="edit-staff-index">
+                <div class="form-group">
+                    <label for="staff-form-id">Order ID</label>
+                    <input type="text" id="staff-form-id" class="modal-input" placeholder="e.g. ORD-1001" required>
+                </div>
+                <div class="form-group">
+                    <label for="staff-form-name">Guest ID</label>
+                    <input type="text" id="staff-form-name" class="modal-input" placeholder="e.g. G-204" required>
+                </div>
+                <div class="form-group">
+                    <label for="staff-form-desig">Service Type</label>
+                    <input type="text" id="staff-form-desig" class="modal-input" placeholder="e.g. Room Service" required>
+                </div>
+                <div class="form-group">
+                    <label for="staff-form-dept">Details / Info</label>
+                    <input type="text" id="staff-form-dept" class="modal-input" placeholder="e.g. Extra towels and water" required>
+                </div>
+                <div class="form-group">
+                    <label for="staff-form-status">Status</label>
+                    <select id="staff-form-status" class="modal-input" required>
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-confirm-payment">Save Service Request</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Feedback Message Alert Modal -->
+    <div id="feedback-alert-modal" class="popup-modal modal-hidden">
+        <div class="modal-card feedback-card">
+            <div class="feedback-icon-circle">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <p class="feedback-message" id="feedback-alert-message">Action Successful!</p>
+            <button class="btn-feedback-action" id="feedback-alert-action-btn" onclick="closeFeedbackAlert()">Close</button>
+        </div>
+    </div>
+
+    <script src="app.js?v=2"></script>
+</body>
+</html>
