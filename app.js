@@ -60,7 +60,22 @@ let state = {
     rooms: [],
     staff: [],
     bookings: [],
-    currentUser: JSON.parse(localStorage.getItem('hotelix_user')) || null,
+    currentUser: (() => {
+        try {
+            const savedUser = JSON.parse(localStorage.getItem('hotelix_user') || 'null');
+            const savedUserId = Number(savedUser?.userId ?? savedUser?.user_id);
+            if (!savedUser || !Number.isInteger(savedUserId) || savedUserId <= 0) {
+                localStorage.removeItem('hotelix_user');
+                localStorage.removeItem('hotelix_token');
+                return null;
+            }
+            return savedUser;
+        } catch {
+            localStorage.removeItem('hotelix_user');
+            localStorage.removeItem('hotelix_token');
+            return null;
+        }
+    })(),
     currentOrder: [],
     selectedHkServices: ['Room Cleaning'],
     selectedBookingRoom: null,
