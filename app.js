@@ -258,16 +258,16 @@ async function initiateBooking(roomId, roomName, price) {
 
         const formattedSearchName = roomName.toLowerCase().trim();
         const matchedRoom = state.rooms.find(r => {
-            const type = (r.type || r.room_type || '').toLowerCase().trim();
+            const type = (r.type || r.roomType || r.room_type || '').toLowerCase().trim();
             return type === formattedSearchName || type.includes(formattedSearchName) || formattedSearchName.includes(type);
         });
 
         if (matchedRoom) {
-            state.selectedRoomId = matchedRoom.room_id || matchedRoom.id;
+            state.selectedRoomId = matchedRoom.roomId || matchedRoom.room_id || matchedRoom.id;
         } else if (state.rooms.length > 0) {
-            state.selectedRoomId = state.rooms[0].room_id || state.rooms[0].id;
+            state.selectedRoomId = state.rooms[0].roomId || state.rooms[0].room_id || state.rooms[0].id;
         } else {
-            state.selectedRoomId = 1;
+            state.selectedRoomId = null;
         }
 
         const hiddenInput = document.getElementById('booking-room-id-value');
@@ -325,60 +325,45 @@ async function handleContactSubmit(event) {
 
 async function processRoomBooking(event) {
     event.preventDefault();
-    
-    const guestName = document.getElementById('booking-guest-name').value;
+
+    const guestName = document.getElementById('booking-guest-name').value.trim();
     const checkIn = document.getElementById('booking-checkin').value;
     const checkOut = document.getElementById('booking-checkout').value;
+    const roomId = Number(state.selectedRoomId);
 
-    const hiddenInput = document.getElementById('booking-room-id-value');
-    const roomIdVal = state.selectedRoomId || (hiddenInput ? Number(hiddenInput.value) : 1);
-    const userIdToUse = state.currentUser ? (state.currentUser.user_id || 4) : 4;
+    if (!Number.isInteger(roomId) || roomId <= 0) {
+        showFeedbackAlert("This room is not connected to a valid database record. Please refresh the page and select the room again.", "Close", null, false);
+        return;
+    }
 
+    if (!checkIn || !checkOut || checkOut <= checkIn) {
+        showFeedbackAlert("Please choose a check-out date after the check-in date.", "Close", null, false);
+        return;
+    }
+
+    // ASP.NET Core uses camelCase JSON by default. Match the C# Booking model.
     const newBooking = {
-        booking_id: 0,
-        user_id: userIdToUse, 
-        room_id: Number(roomIdVal),
-        check_in: new Date(checkIn).toISOString(),
-        check_out: new Date(checkOut).toISOString(),
+        bookingId: 0,
+        userId: state.currentUser?.user_id ?? state.currentUser?.userId ?? null,
+        roomId: roomId,
+        checkIn: checkIn,
+        checkOut: checkOut,
         status: 'Confirmed'
     };
 
     try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/Bookings`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('hotelix_token')}`
-            },
-            body: JSON.stringify(newBooking)
-        });
-
-        let data = null;
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-            data = await response.json();
-        }
-
-        if (!response.ok) {
-            const errorMsg = (data && data.message) ? data.message : "This room is already booked for the selected dates. Please choose different dates.";
-            showFeedbackAlert(errorMsg, "Close", null, false);
-            return;
-        }
-
+        await apiRequest('/Bookings', 'POST', newBooking);
         closeBookingPromptModal();
         showFeedbackAlert(`Booking Confirmed for ${state.selectedBookingRoom} (${guestName})!`, "View Dashboard", () => {
             window.location.href = 'guest.html';
         }, true);
     } catch (e) {
-        console.error("DETAILED API ERROR:", e);
-        showFeedbackAlert("This room is already booked for the selected dates or database error occurred.", "Close", null, false);
+        console.error("DETAILED BOOKING API ERROR:", e);
+        showFeedbackAlert(e.message || "Unable to complete this booking. Please check the selected room and dates, then try again.", "Close", null, false);
     }
 }
 
 // ==========================================================================
-// ADMIN & GUEST & STAFF DASHBOARD LOGIC
-// ==========================================================================
-
 function switchAdminTab(tabName) {
     const panels = document.querySelectorAll('.dashboard-panel');
     panels.forEach(panel => panel.classList.add('panel-hidden'));
@@ -424,11 +409,11 @@ async function renderStaffDashboard() {
             if (bookings.length > 0) {
                 bookingsTbody.innerHTML = bookings.map(bk => `
                     <tr>
-                        <td>#${bk.booking_id || 1}</td>
-                        <td>Guest #${bk.user_id}</td>
-                        <td>Room #${bk.room_id}</td>
-                        <td>${formatDateStr(bk.check_in)}</td>
-                        <td>${formatDateStr(bk.check_out)}</td>
+                        <td>#${bk.bookingId || bk.booking_id || ''}</td>
+                        <td>Guest #${(bk.userId ?? bk.user_id)}</td>
+                        <td>Room #${(bk.roomId ?? bk.room_id)}</td>
+                        <td>${formatDateStr((bk.checkIn || bk.check_in))}</td>
+                        <td>${formatDateStr((bk.checkOut || bk.check_out))}</td>
                         <td><span class="badge success">${bk.status || 'Confirmed'}</span></td>
                     </tr>
                 `).join('');
@@ -460,18 +445,60 @@ async function renderStaffDashboard() {
 }
 
 async function renderAdminDashboard() {
-    await loadAllBookings();
+    try {
+        const [bookings, rooms] = await Promise.all([
+            apiRequest('/Bookings'),
+            apiRequest('/Rooms')
+        ]);
+        state.bookings = bookings || [];
+        state.rooms = rooms || [];
+    } catch (e) {
+        console.error("Could not load admin room statistics:", e);
+        showFeedbackAlert("Could not load room statistics from the database. Please check the backend connection.", "Close", null, false);
+        return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const activeStatuses = ['confirmed', 'pending', 'booked'];
+
+    const currentlyBookedRoomIds = new Set(
+        state.bookings.filter(bk => {
+            const status = String(bk.status || '').toLowerCase();
+            const checkIn = new Date(bk.checkIn || bk.check_in);
+            const checkOut = new Date(bk.checkOut || bk.check_out);
+            checkIn.setHours(0, 0, 0, 0);
+            checkOut.setHours(0, 0, 0, 0);
+            return activeStatuses.includes(status) && checkIn <= today && checkOut > today;
+        }).map(bk => Number(bk.roomId ?? bk.room_id)).filter(id => Number.isInteger(id) && id > 0)
+    );
+
+    const totalRooms = state.rooms.length;
+    const bookedRooms = currentlyBookedRoomIds.size;
+    const availableRooms = Math.max(0, totalRooms - bookedRooms);
+
+    const totalRoomsEl = document.getElementById('stat-total-rooms');
+    const bookedRoomsEl = document.getElementById('stat-booked-rooms');
+    const availableRoomsEl = document.getElementById('stat-available-rooms');
+    const totalBookingsEl = document.getElementById('stat-total-bookings');
+
+    if (totalRoomsEl) totalRoomsEl.textContent = totalRooms;
+    if (bookedRoomsEl) bookedRoomsEl.textContent = bookedRooms;
+    if (availableRoomsEl) availableRoomsEl.textContent = availableRooms;
+    if (totalBookingsEl) totalBookingsEl.textContent = state.bookings.length;
 
     const recentTbody = document.getElementById('admin-recent-bookings-tbody');
-    if (recentTbody && state.bookings.length > 0) {
-        recentTbody.innerHTML = state.bookings.slice(0, 5).map((bk) => `
-            <tr>
-                <td>Guest #${bk.user_id}</td>
-                <td>Room #${bk.room_id}</td>
-                <td>${formatDateStr(bk.check_in)}</td>
-                <td><span class="status-badge confirmed">${bk.status || 'Confirmed'}</span></td>
-            </tr>
-        `).join('');
+    if (recentTbody) {
+        recentTbody.innerHTML = state.bookings.length > 0
+            ? state.bookings.slice(0, 5).map(bk => `
+                <tr>
+                    <td>Guest #${bk.userId ?? bk.user_id ?? 'N/A'}</td>
+                    <td>Room #${bk.roomId ?? bk.room_id ?? 'N/A'}</td>
+                    <td>${formatDateStr(bk.checkIn || bk.check_in)}</td>
+                    <td><span class="status-badge confirmed">${bk.status || 'Confirmed'}</span></td>
+                </tr>
+            `).join('')
+            : '<tr><td colspan="4" style="text-align:center;">No bookings found.</td></tr>';
     }
 
     renderAdminBookings();
@@ -512,9 +539,9 @@ async function renderAdminRooms() {
         if (roomsData.length > 0) {
             tbody.innerHTML = roomsData.map((room, index) => `
                 <tr>
-                    <td>#${room.room_id || room.id || 1}</td>
-                    <td>${room.type || room.room_type || 'Deluxe'}</td>
-                    <td>$${room.price || 150}</td>
+                    <td>#${room.roomId || room.room_id || room.id}</td>
+                    <td>${room.roomType || room.room_type || room.type || 'Deluxe'}</td>
+                    <td>$${room.price ?? 150}</td>
                     <td><span class="status-badge ${(room.status || 'Available').toLowerCase()}">${room.status || 'Available'}</span></td>
                     <td>
                         <button class="btn-table-action delete" onclick="deleteRoom(${room.room_id || room.id || index})"><i class="fa-solid fa-trash"></i> Delete</button>
