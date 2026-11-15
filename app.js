@@ -600,7 +600,7 @@ async function renderAdminStaff() {
                     <td>${st.details || 'N/A'}</td>
                     <td><span class="status-badge active">${st.status || 'Pending'}</span></td>
                     <td>
-                        <button class="btn-table-action delete" onclick="deleteStaff(${st.order_id || st.id})"><i class="fa-solid fa-trash"></i> Delete</button>
+                        <button class="btn-table-action delete" onclick="deleteStaff(${Number(st.orderId ?? st.order_id ?? st.id)})"><i class="fa-solid fa-trash"></i> Delete</button>
                     </td>
                 </tr>
             `).join('');
