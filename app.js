@@ -819,32 +819,99 @@ async function renderGuestDashboard() {
     }
 
     const activeCard = document.getElementById('guest-active-booking-card');
-    if (!activeCard) return;
+    const bookingsBox = document.getElementById('guest-bookings-details-box');
+    const ordersBox = document.getElementById('guest-booking-history-container');
+    const userId = Number(state.currentUser?.userId ?? state.currentUser?.user_id);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+        if (activeCard) activeCard.style.display = 'none';
+        if (bookingsBox) bookingsBox.innerHTML = '<p>No bookings found for this account.</p>';
+        if (ordersBox) ordersBox.innerHTML = '<p>No orders or service requests found.</p>';
+        return;
+    }
+
     try {
-        const bookings = await apiRequest('/Bookings') || [];
-        const userId = state.currentUser?.userId ?? state.currentUser?.user_id;
-        const ownBookings = userId == null ? [] : bookings.filter(b =>
-            Number(b.userId ?? b.user_id) === Number(userId));
-        const latest = ownBookings[ownBookings.length - 1];
-        if (!latest) {
-            activeCard.style.display = 'none';
-            return;
+        const [allBookings, allServices] = await Promise.all([
+            apiRequest('/Bookings'),
+            apiRequest('/Services')
+        ]);
+        const ownBookings = (allBookings || [])
+            .filter(b => Number(b.userId ?? b.user_id) === userId)
+            .sort((a, b) => Number(b.bookingId ?? b.booking_id) - Number(a.bookingId ?? a.booking_id));
+        const ownServices = (allServices || [])
+            .filter(s => Number(s.userId ?? s.user_id) === userId)
+            .sort((a, b) => Number(b.orderId ?? b.order_id ?? b.id) - Number(a.orderId ?? a.order_id ?? a.id));
+
+        const activeBooking = ownBookings.find(b =>
+            ['confirmed', 'pending', 'booked'].includes(String(b.status || '').toLowerCase()));
+        if (activeCard) {
+            if (!activeBooking) {
+                activeCard.style.display = 'none';
+            } else {
+                activeCard.style.display = 'block';
+                const roomId = activeBooking.roomId ?? activeBooking.room_id;
+                document.getElementById('active-room-name').innerText = `Room #${roomId}`;
+                document.getElementById('active-check-in').innerText = formatDateStr(activeBooking.checkIn ?? activeBooking.check_in);
+                document.getElementById('active-check-out').innerText = formatDateStr(activeBooking.checkOut ?? activeBooking.check_out);
+                document.getElementById('active-room-number').innerText = roomId ?? '';
+            }
         }
-        const roomId = latest.roomId ?? latest.room_id;
-        const checkIn = latest.checkIn ?? latest.check_in;
-        const checkOut = latest.checkOut ?? latest.check_out;
-        activeCard.style.display = 'block';
-        const roomName = document.getElementById('active-room-name');
-        const inDate = document.getElementById('active-check-in');
-        const outDate = document.getElementById('active-check-out');
-        const roomNumber = document.getElementById('active-room-number');
-        if (roomName) roomName.innerText = `Room #${roomId}`;
-        if (inDate) inDate.innerText = formatDateStr(checkIn);
-        if (outDate) outDate.innerText = formatDateStr(checkOut);
-        if (roomNumber) roomNumber.innerText = roomId ?? '';
+
+        if (bookingsBox) {
+            bookingsBox.innerHTML = ownBookings.length ? ownBookings.map(b => {
+                const id = Number(b.bookingId ?? b.booking_id);
+                const status = String(b.status || 'Confirmed');
+                const checkIn = b.checkIn ?? b.check_in;
+                const canCancel = ['confirmed', 'pending', 'booked'].includes(status.toLowerCase())
+                    && String(checkIn || '').slice(0, 10) > new Date().toISOString().slice(0, 10);
+                return `<div class="booking-detail-item" style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:14px;border-bottom:1px solid #eee;">
+                    <div><strong>Booking #${id} — Room #${b.roomId ?? b.room_id ?? 'N/A'}</strong>
+                    <div>Check-in: ${formatDateStr(checkIn)} | Check-out: ${formatDateStr(b.checkOut ?? b.check_out)}</div>
+                    <div>Status: <strong>${status}</strong></div></div>
+                    ${canCancel ? `<button type="button" class="btn-table-action delete" onclick="cancelGuestBooking(${id})">Cancel Booking</button>` : ''}
+                </div>`;
+            }).join('') : '<p style="padding:15px;text-align:center;color:#777;">No bookings found.</p>';
+        }
+
+        if (ordersBox) {
+            ordersBox.innerHTML = ownServices.length ? ownServices.map(s => {
+                const id = Number(s.orderId ?? s.order_id ?? s.id);
+                const status = String(s.status || 'Pending');
+                const canCancel = status.toLowerCase() === 'pending';
+                return `<div class="booking-detail-item" style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:14px;border-bottom:1px solid #eee;">
+                    <div><strong>Order / Request #${id} — ${s.serviceType ?? s.service_type ?? 'Service'}</strong>
+                    <div>${s.details || 'No additional details'}</div>
+                    <div>Status: <strong>${status}</strong></div></div>
+                    ${canCancel ? `<button type="button" class="btn-table-action delete" onclick="cancelGuestOrder(${id})">Cancel Order</button>` : ''}
+                </div>`;
+            }).join('') : '<p style="padding:15px;text-align:center;color:#777;">No orders or service requests found.</p>';
+        }
     } catch (error) {
-        console.error('Could not load guest bookings:', error);
-        activeCard.style.display = 'none';
+        console.error('Could not load guest bookings and orders:', error);
+        if (bookingsBox) bookingsBox.innerHTML = '<p>Unable to load your bookings. Please refresh the page.</p>';
+        if (ordersBox) ordersBox.innerHTML = '<p>Unable to load your orders. Please refresh the page.</p>';
+    }
+}
+
+async function cancelGuestBooking(id) {
+    if (!confirm('Are you sure you want to cancel this room booking?')) return;
+    const userId = Number(state.currentUser?.userId ?? state.currentUser?.user_id);
+    try {
+        await apiRequest(`/Bookings/${id}/cancel?userId=${encodeURIComponent(userId)}`, 'PATCH');
+        showFeedbackAlert('Your booking has been cancelled.', 'Close', () => renderGuestDashboard(), true);
+    } catch (error) {
+        showFeedbackAlert(error.message || 'Unable to cancel this booking.', 'Close', null, false);
+    }
+}
+
+async function cancelGuestOrder(id) {
+    if (!confirm('Are you sure you want to cancel this order or service request?')) return;
+    const userId = Number(state.currentUser?.userId ?? state.currentUser?.user_id);
+    try {
+        await apiRequest(`/Services/${id}/cancel?userId=${encodeURIComponent(userId)}`, 'PATCH');
+        showFeedbackAlert('Your order or service request has been cancelled.', 'Close', () => renderGuestDashboard(), true);
+    } catch (error) {
+        showFeedbackAlert(error.message || 'Unable to cancel this order.', 'Close', null, false);
     }
 }
 
@@ -973,6 +1040,7 @@ async function confirmRoomServiceOrder(event) {
         showFeedbackAlert("Room Service Order placed successfully! Our staff will attend to it shortly.", "Close", () => {
             state.currentOrder = [];
             renderOrderSummary();
+            renderGuestDashboard();
         }, true);
     } catch (e) {
         console.error("Error submitting room service:", e);
@@ -1050,6 +1118,7 @@ async function submitHousekeepingRequest(event) {
         showFeedbackAlert("Housekeeping request submitted successfully! Our staff will attend to your room.", "Close", () => {
             const hkForm = document.getElementById('housekeeping-request-form');
             if (hkForm) hkForm.reset();
+            renderGuestDashboard();
         }, true);
     } catch (e) {
         console.error("Error submitting housekeeping:", e);
