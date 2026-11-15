@@ -243,36 +243,34 @@ async function initiateBooking(roomId, roomName, price) {
     state.selectedBookingRoom = roomName;
     state.selectedRoomPrice = price;
 
-    if (roomId) {
-        state.selectedRoomId = Number(roomId);
-        const hiddenInput = document.getElementById('booking-room-id-value');
-        if (hiddenInput) hiddenInput.value = roomId;
-    } else {
-        if (!state.rooms || state.rooms.length === 0) {
-            try {
-                state.rooms = await apiRequest('/Rooms') || [];
-            } catch (e) {
-                console.error("Failed to fetch rooms during booking initiation", e);
-            }
+    if (!state.rooms || state.rooms.length === 0) {
+        try {
+            state.rooms = await apiRequest('/Rooms') || [];
+        } catch (e) {
+            console.error("Failed to fetch rooms during booking initiation", e);
         }
-
-        const formattedSearchName = roomName.toLowerCase().trim();
-        const matchedRoom = state.rooms.find(r => {
-            const type = (r.type || r.roomType || r.room_type || '').toLowerCase().trim();
-            return type === formattedSearchName || type.includes(formattedSearchName) || formattedSearchName.includes(type);
-        });
-
-        if (matchedRoom) {
-            state.selectedRoomId = matchedRoom.roomId || matchedRoom.room_id || matchedRoom.id;
-        } else if (state.rooms.length > 0) {
-            state.selectedRoomId = state.rooms[0].roomId || state.rooms[0].room_id || state.rooms[0].id;
-        } else {
-            state.selectedRoomId = null;
-        }
-
-        const hiddenInput = document.getElementById('booking-room-id-value');
-        if (hiddenInput) hiddenInput.value = state.selectedRoomId;
     }
+
+    const formattedSearchName = String(roomName || '').toLowerCase().trim();
+    const matchedRoom = state.rooms.find(r => {
+        const type = (r.roomType || r.room_type || r.type || '').toLowerCase().trim();
+        return type === formattedSearchName;
+    });
+
+    const requestedRoomId = Number(roomId);
+    const roomById = state.rooms.find(r =>
+        Number(r.roomId ?? r.room_id ?? r.id) === requestedRoomId
+    );
+
+    // Prefer the database room matched by its displayed name. Only use the
+    // hard-coded card ID if that ID really exists in the database.
+    const actualRoom = matchedRoom || roomById;
+    state.selectedRoomId = actualRoom
+        ? Number(actualRoom.roomId ?? actualRoom.room_id ?? actualRoom.id)
+        : null;
+
+    const hiddenInput = document.getElementById('booking-room-id-value');
+    if (hiddenInput) hiddenInput.value = state.selectedRoomId || '';
 
     const bookingPromptModal = document.getElementById('booking-prompt-modal');
     if (bookingPromptModal) {
