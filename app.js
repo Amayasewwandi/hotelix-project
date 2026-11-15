@@ -507,24 +507,29 @@ async function renderAdminDashboard() {
 async function renderAdminBookings() {
     await loadAllBookings();
     const tbody = document.getElementById('admin-bookings-tbody');
-    if (tbody) {
-        if (state.bookings.length > 0) {
-            tbody.innerHTML = state.bookings.map((bk) => `
+    if (!tbody) return;
+
+    if (state.bookings.length > 0) {
+        tbody.innerHTML = state.bookings.map(bk => {
+            const bookingId = bk.bookingId ?? bk.booking_id;
+            const userId = bk.userId ?? bk.user_id ?? 'N/A';
+            const roomId = bk.roomId ?? bk.room_id ?? 'N/A';
+            return `
                 <tr>
-                    <td>#${bk.booking_id || 1}</td>
-                    <td>Guest #${bk.user_id}</td>
-                    <td>Room #${bk.room_id}</td>
-                    <td>${formatDateStr(bk.check_in)}</td>
-                    <td>${formatDateStr(bk.check_out)}</td>
+                    <td>#${bookingId ?? ''}</td>
+                    <td>Guest #${userId}</td>
+                    <td>Room #${roomId}</td>
+                    <td>${formatDateStr(bk.checkIn || bk.check_in)}</td>
+                    <td>${formatDateStr(bk.checkOut || bk.check_out)}</td>
                     <td><span class="status-badge confirmed">${bk.status || 'Confirmed'}</span></td>
                     <td>
-                        <button class="btn-table-action delete" onclick="deleteBooking(${bk.booking_id || 1})"><i class="fa-solid fa-ban"></i> Delete</button>
+                        <button class="btn-table-action delete" onclick="deleteBooking(${Number(bookingId)})"><i class="fa-solid fa-ban"></i> Delete</button>
                     </td>
                 </tr>
-            `).join('');
-        } else {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No bookings found.</td></tr>`;
-        }
+            `;
+        }).join('');
+    } else {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No bookings found.</td></tr>`;
     }
 }
 
