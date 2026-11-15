@@ -458,50 +458,47 @@
         </div>
     </div>
 
-    <!-- Updated Script to populate Active Booking Card dynamically -->
+    <!-- Populate the guest dashboard from the live bookings API. -->
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
-            const currentUser = JSON.parse(localStorage.getItem('hotelix_user'));
+            const currentUser = JSON.parse(localStorage.getItem("hotelix_user") || "null");
             if (currentUser) {
-                const welcomeTitle = document.getElementById('guest-welcome-title');
-                if (welcomeTitle) {
-                    welcomeTitle.innerText = `Welcome back, ${currentUser.name}!`;
-                }
-
-                const profileNameTitle = document.getElementById('profile-name-title');
-                const profileFullNameInput = document.getElementById('profile-full-name');
-                const profileEmailInput = document.getElementById('profile-email');
-
-                if (profileNameTitle) profileNameTitle.innerText = currentUser.name;
-                if (profileFullNameInput) profileFullNameInput.value = currentUser.name;
-                if (profileEmailInput) profileEmailInput.value = currentUser.email;
+                const welcomeTitle = document.getElementById("guest-welcome-title");
+                const profileNameTitle = document.getElementById("profile-name-title");
+                const profileFullNameInput = document.getElementById("profile-full-name");
+                const profileEmailInput = document.getElementById("profile-email");
+                if (welcomeTitle) welcomeTitle.innerText = `Welcome back, ${currentUser.name || "Guest"}!`;
+                if (profileNameTitle) profileNameTitle.innerText = currentUser.name || "Guest";
+                if (profileFullNameInput) profileFullNameInput.value = currentUser.name || "";
+                if (profileEmailInput) profileEmailInput.value = currentUser.email || "";
             }
 
+            const activeCard = document.getElementById("guest-active-booking-card");
             try {
-                const response = await fetch('https://hotelixbackend-production.up.railway.app/api',replace(/\/+$/, '') {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('hotelix_token')}`
-                    }
-                });
-                if (response.ok) {
-                    const bookings = await response.json();
-                    const activeCard = document.getElementById('guest-active-booking-card');
-                    if (bookings && bookings.length > 0) {
-                        if (activeCard) {
-                            activeCard.style.display = 'block';
-                            // Populate latest booking details dynamically
-                            const latest = bookings[bookings.length - 1];
-                            document.getElementById('active-room-name').innerText = `Room #${latest.room_id}`;
-                            document.getElementById('active-check-in').innerText = new Date(latest.check_in).toLocaleDateString();
-                            document.getElementById('active-check-out').innerText = new Date(latest.check_out).toLocaleDateString();
-                            document.getElementById('active-room-number').innerText = latest.room_id;
-                        }
-                    } else {
-                        if (activeCard) activeCard.style.display = 'none';
-                    }
+                const response = await fetch("https://hotelixbackend-production.up.railway.app/api/Bookings");
+                if (!response.ok) throw new Error(`Bookings API returned HTTP ${response.status}`);
+                const bookings = await response.json();
+                if (!Array.isArray(bookings) || bookings.length === 0) {
+                    if (activeCard) activeCard.style.display = "none";
+                    return;
                 }
-            } catch (err) {
-                console.warn("Could not fetch bookings for dynamic UI update.", err);
+
+                const latest = bookings[bookings.length - 1];
+                const roomId = latest.roomId ?? latest.room_id;
+                const checkIn = latest.checkIn ?? latest.check_in;
+                const checkOut = latest.checkOut ?? latest.check_out;
+                if (activeCard) activeCard.style.display = "block";
+                const roomName = document.getElementById("active-room-name");
+                const inDate = document.getElementById("active-check-in");
+                const outDate = document.getElementById("active-check-out");
+                const roomNumber = document.getElementById("active-room-number");
+                if (roomName) roomName.innerText = `Room #${roomId}`;
+                if (inDate) inDate.innerText = checkIn ? new Date(checkIn).toLocaleDateString() : "";
+                if (outDate) outDate.innerText = checkOut ? new Date(checkOut).toLocaleDateString() : "";
+                if (roomNumber) roomNumber.innerText = roomId ?? "";
+            } catch (error) {
+                console.warn("Could not load guest bookings:", error);
+                if (activeCard) activeCard.style.display = "none";
             }
         });
     </script>
