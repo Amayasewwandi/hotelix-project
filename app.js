@@ -31,9 +31,10 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
     try {
         const response = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, options);
         
-        if (response.status === 401) {
+        if (response.status === 401 && !endpoint.toLowerCase().startsWith('/auth/login')) {
             console.warn("Unauthorized access or token expired. Redirecting to login...");
-            localStorage.clear();
+            localStorage.removeItem('hotelix_user');
+            localStorage.removeItem('hotelix_token');
             if (!window.location.pathname.includes('login.html')) {
                 window.location.href = 'login.html';
             }
@@ -42,7 +43,7 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            throw new Error(errorData.message || errorData.title || `HTTP error! status: ${response.status}`);
         }
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
@@ -104,21 +105,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else if (page === "login.html") {
         initLoginPage();
     } else if (page === "guest.html") {
-        ensureRoleAccess(['guest', 'Guest']); 
-        initGuestPage();
+        if (ensureRoleAccess(['guest'])) initGuestPage();
     } else if (page === "admin.html") {
-        ensureRoleAccess(['admin', 'Admin']); 
-        initAdminPage();
+        if (ensureRoleAccess(['admin'])) initAdminPage();
     } else if (page === "staff.html") {
-        ensureRoleAccess(['staff', 'Staff', 'admin', 'Admin']); 
-        initStaffPage();
+        if (ensureRoleAccess(['staff', 'admin'])) initStaffPage();
     }
 });
 
 function ensureRoleAccess(allowedRoles) {
-    if (!state.currentUser) {
+    const currentRole = String(state.currentUser?.role || '').trim().toLowerCase();
+    const allowed = allowedRoles.map(role => role.toLowerCase());
+    if (!state.currentUser || !allowed.includes(currentRole)) {
+        localStorage.removeItem('hotelix_user');
+        localStorage.removeItem('hotelix_token');
         window.location.href = 'login.html';
+        return false;
     }
+    return true;
 }
 
 async function loadAllBookings() {
@@ -192,34 +196,42 @@ function initStaffPage() {
 
 async function handleLogin(event) {
     event.preventDefault();
-    
+
     const roleEl = document.getElementById('login-role');
     const emailEl = document.getElementById('login-email');
-
-    if (!roleEl || !emailEl) return;
+    const passwordEl = document.getElementById('login-password');
+    if (!roleEl || !emailEl || !passwordEl) return;
 
     const role = roleEl.value.toLowerCase().trim();
     const email = emailEl.value.trim();
+    const password = passwordEl.value;
+    if (!email || !password) {
+        showFeedbackAlert("Please enter your email address and password.", "Close", null, false);
+        return;
+    }
 
-    const loggedUser = {
-        name: email.split('@')[0] || 'User',
-        email: email,
-        role: role
-    };
+    try {
+        const result = await apiRequest('/Auth/login', 'POST', { email, password, role });
+        const loggedUser = {
+            userId: result.userId,
+            user_id: result.userId,
+            name: result.name,
+            email: result.email,
+            role: String(result.role || role).toLowerCase()
+        };
+        state.currentUser = loggedUser;
+        localStorage.setItem('hotelix_user', JSON.stringify(loggedUser));
+        localStorage.removeItem('hotelix_token');
 
-    state.currentUser = loggedUser;
-    localStorage.setItem('hotelix_user', JSON.stringify(loggedUser));
-    localStorage.setItem('hotelix_token', 'sample_jwt_token_12345');
-
-    showFeedbackAlert(`Login Successful! Welcome back, ${loggedUser.name}.`, "Continue", () => {
-        if (role === 'admin') {
-            window.location.href = 'admin.html';
-        } else if (role === 'staff') {
-            window.location.href = 'staff.html';
-        } else {
-            window.location.href = 'guest.html';
-        }
-    }, true);
+        showFeedbackAlert(`Login Successful! Welcome back, ${loggedUser.name}.`, "Continue", () => {
+            if (loggedUser.role === 'admin') window.location.href = 'admin.html';
+            else if (loggedUser.role === 'staff') window.location.href = 'staff.html';
+            else window.location.href = 'guest.html';
+        }, true);
+    } catch (error) {
+        console.error("Login failed:", error);
+        showFeedbackAlert(error.message || "Login failed. Please check your email and password.", "Close", null, false);
+    }
 }
 
 // ==========================================================================
@@ -426,9 +438,9 @@ async function renderStaffDashboard() {
             if (services.length > 0) {
                 servicesTbody.innerHTML = services.map(st => `
                     <tr>
-                        <td>#${st.order_id || st.id || 1}</td>
-                        <td>User #${st.user_id || 'N/A'}</td>
-                        <td>${st.service_type || 'General'}</td>
+                        <td>#${st.orderId ?? st.order_id ?? st.id ?? ''}</td>
+                        <td>User #${st.userId ?? st.user_id ?? 'N/A'}</td>
+                        <td>${st.serviceType ?? st.service_type ?? 'General'}</td>
                         <td>${st.details || 'N/A'}</td>
                         <td><span class="badge pending">${st.status || 'Pending'}</span></td>
                     </tr>
@@ -582,9 +594,9 @@ async function renderAdminStaff() {
         if (servicesData.length > 0) {
             tbody.innerHTML = servicesData.map((st) => `
                 <tr>
-                    <td>#${st.order_id || st.id || 1}</td>
-                    <td>User #${st.user_id || 'N/A'}</td>
-                    <td><strong>${st.service_type || 'General Service'}</strong></td>
+                    <td>#${st.orderId ?? st.order_id ?? st.id ?? ''}</td>
+                    <td>User #${st.userId ?? st.user_id ?? 'N/A'}</td>
+                    <td><strong>${st.serviceType ?? st.service_type ?? 'General Service'}</strong></td>
                     <td>${st.details || 'N/A'}</td>
                     <td><span class="status-badge active">${st.status || 'Pending'}</span></td>
                     <td>
@@ -609,12 +621,12 @@ async function handleRoomSave(event) {
     const price = document.getElementById('room-form-price').value;
     const status = document.getElementById('room-form-status').value;
 
-    const newRoom = {
-        room_id: parseInt(roomNo) || 0,
-        type: roomType,
-        price: parseFloat(price) || 0,
-        status: status
-    };
+    const roomId = Number.parseInt(roomNo, 10);
+    if (!Number.isInteger(roomId) || roomId <= 0) {
+        showFeedbackAlert("Please enter a valid, unused numeric room ID.", "Close", null, false);
+        return;
+    }
+    const newRoom = { roomId, roomType, price: parseFloat(price) || 0, status };
 
     try {
         await apiRequest('/Rooms', 'POST', newRoom);
@@ -631,18 +643,17 @@ async function handleRoomSave(event) {
 async function handleStaffSave(event) {
     event.preventDefault();
 
-    const orderId = document.getElementById('staff-form-id').value;
-    const guestId = document.getElementById('staff-form-name').value;
+    const guestId = document.getElementById('staff-form-name').value.trim();
     const serviceType = document.getElementById('staff-form-desig').value;
     const details = document.getElementById('staff-form-dept').value;
     const status = document.getElementById('staff-form-status').value;
 
+    const parsedGuestId = guestId ? Number.parseInt(guestId, 10) : null;
     const newServiceRequest = {
-        order_id: parseInt(orderId) || 0,
-        user_id: parseInt(guestId) || 4,
-        service_type: serviceType,
-        details: details,
-        status: status
+        userId: Number.isInteger(parsedGuestId) && parsedGuestId > 0 ? parsedGuestId : null,
+        serviceType,
+        details,
+        status
     };
 
     try {
@@ -682,7 +693,7 @@ async function deleteBooking(id) {
     if (confirm("Are you sure you want to delete this booking?")) {
         try {
             await apiRequest(`/Bookings/${id}`, 'DELETE');
-            state.bookings = state.bookings.filter(b => b.booking_id !== id);
+            state.bookings = state.bookings.filter(b => Number(b.bookingId ?? b.booking_id) !== Number(id));
             renderAdminBookings();
             showFeedbackAlert("Booking deleted successfully!", "Close", null, true);
         } catch (e) {
@@ -722,6 +733,35 @@ async function renderGuestDashboard() {
     const welcomeTitle = document.getElementById('guest-welcome-title');
     if (welcomeTitle && state.currentUser) {
         welcomeTitle.innerText = `Welcome back, ${state.currentUser.name}!`;
+    }
+
+    const activeCard = document.getElementById('guest-active-booking-card');
+    if (!activeCard) return;
+    try {
+        const bookings = await apiRequest('/Bookings') || [];
+        const userId = state.currentUser?.userId ?? state.currentUser?.user_id;
+        const ownBookings = userId == null ? [] : bookings.filter(b =>
+            Number(b.userId ?? b.user_id) === Number(userId));
+        const latest = ownBookings[ownBookings.length - 1];
+        if (!latest) {
+            activeCard.style.display = 'none';
+            return;
+        }
+        const roomId = latest.roomId ?? latest.room_id;
+        const checkIn = latest.checkIn ?? latest.check_in;
+        const checkOut = latest.checkOut ?? latest.check_out;
+        activeCard.style.display = 'block';
+        const roomName = document.getElementById('active-room-name');
+        const inDate = document.getElementById('active-check-in');
+        const outDate = document.getElementById('active-check-out');
+        const roomNumber = document.getElementById('active-room-number');
+        if (roomName) roomName.innerText = `Room #${roomId}`;
+        if (inDate) inDate.innerText = formatDateStr(checkIn);
+        if (outDate) outDate.innerText = formatDateStr(checkOut);
+        if (roomNumber) roomNumber.innerText = roomId ?? '';
+    } catch (error) {
+        console.error('Could not load guest bookings:', error);
+        activeCard.style.display = 'none';
     }
 }
 
@@ -766,8 +806,13 @@ function closeFeedbackAlert() {
 
 function formatDateStr(dateString) {
     if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const dateOnly = String(dateString).slice(0, 10);
+    const parts = dateOnly.split('-').map(Number);
+    const date = parts.length === 3 && parts.every(Number.isFinite)
+        ? new Date(parts[0], parts[1] - 1, parts[2])
+        : new Date(dateString);
+    return Number.isNaN(date.getTime()) ? '' :
+        date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 // ==========================================================================
@@ -830,13 +875,12 @@ async function confirmRoomServiceOrder(event) {
         return;
     }
 
-    const userIdToUse = state.currentUser ? (state.currentUser.user_id || 4) : 4;
+    const userIdToUse = state.currentUser?.userId ?? state.currentUser?.user_id ?? null;
 
     const orderData = {
-        order_id: 0,
-        user_id: userIdToUse,
-        staff_id: 1,
-        service_type: 'Room Service',
+        orderId: 0,
+        userId: userIdToUse,
+        serviceType: 'Room Service',
         details: JSON.stringify(state.currentOrder),
         status: 'Pending'
     };
@@ -857,7 +901,7 @@ async function confirmRoomServiceOrder(event) {
 // GUEST SERVICES SUB-SECTION & HOUSEKEEPING LOGIC
 // ==========================================================================
 
-function toggleServiceSubSection(sectionNameCode) {
+function toggleServiceSubSection(sectionNameCode, clickedButton) {
     const roomServiceEl = document.getElementById('guest-sub-room-service');
     const housekeepingEl = document.getElementById('guest-sub-housekeeping');
     const toggles = document.querySelectorAll('.service-panel-toggle');
@@ -867,11 +911,11 @@ function toggleServiceSubSection(sectionNameCode) {
     if (sectionNameCode === 'room-service') {
         if (roomServiceEl) roomServiceEl.classList.remove('panel-hidden');
         if (housekeepingEl) housekeepingEl.classList.add('panel-hidden');
-        if (event && event.currentTarget) event.currentTarget.classList.add('active-service-toggle');
+        if (clickedButton) clickedButton.classList.add('active-service-toggle');
     } else if (sectionNameCode === 'housekeeping') {
         if (roomServiceEl) roomServiceEl.classList.add('panel-hidden');
         if (housekeepingEl) housekeepingEl.classList.remove('panel-hidden');
-        if (event && event.currentTarget) event.currentTarget.classList.add('active-service-toggle');
+        if (clickedButton) clickedButton.classList.add('active-service-toggle');
     }
 }
 
@@ -891,7 +935,7 @@ function selectSinglePill(button, containerId) {
 async function submitHousekeepingRequest(event) {
     if (event) event.preventDefault();
 
-    const selectedPills = document.querySelectorAll('#hk-service-type-pills .pill-btn.selected, #guest-sub-housekeeping .pill-btn.selected');
+    const selectedPills = document.querySelectorAll('#hk-service-type-pills .pill-btn.selected');
     let serviceTypes = [];
     selectedPills.forEach(p => {
         if (p.innerText && !serviceTypes.includes(p.innerText)) {
@@ -908,13 +952,12 @@ async function submitHousekeepingRequest(event) {
     const finalServiceType = serviceTypes.length > 0 ? serviceTypes.join(', ') : 'Room Cleaning';
     const finalDetails = `Time Slot: ${timeSlot} | Notes: ${notes}`;
 
-    const userIdToUse = state.currentUser ? (state.currentUser.user_id || 4) : 4;
+    const userIdToUse = state.currentUser?.userId ?? state.currentUser?.user_id ?? null;
 
     const housekeepingData = {
-        order_id: 0,
-        user_id: userIdToUse,
-        staff_id: 1,
-        service_type: finalServiceType,
+        orderId: 0,
+        userId: userIdToUse,
+        serviceType: finalServiceType,
         details: finalDetails,
         status: 'Pending'
     };
