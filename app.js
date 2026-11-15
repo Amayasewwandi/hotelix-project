@@ -5,7 +5,7 @@
 
 // 1. Configuration Constants (Environment / Base URL management)
 const CONFIG = {
-    API_BASE_URL: window.ENV_API_URL || 'http://hotelixbackend-production.up.railway.app/api'
+    API_BASE_URL: window.ENV_API_URL || 'https://hotelixbackend-production.up.railway.app/api'
 };
 
 // Helper for API requests with enhanced security checks
