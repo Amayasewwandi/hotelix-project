@@ -250,6 +250,74 @@ async function handleLogin(event) {
 }
 
 // ==========================================================================
+
+function toggleGuestRegistration() {
+    const role = document.getElementById('login-role')?.value?.toLowerCase();
+    const registerLink = document.getElementById('guest-register-link');
+    const registerPanel = document.getElementById('guest-registration-panel');
+    if (registerLink) registerLink.style.display = role === 'guest' ? 'block' : 'none';
+    if (role !== 'guest' && registerPanel) registerPanel.style.display = 'none';
+}
+
+function showGuestRegistration(event) {
+    if (event) event.preventDefault();
+    if (document.getElementById('login-role')?.value?.toLowerCase() !== 'guest') return;
+    const loginForm = document.getElementById('login-form');
+    const registerLink = document.getElementById('guest-register-link');
+    const registerPanel = document.getElementById('guest-registration-panel');
+    if (loginForm) loginForm.style.display = 'none';
+    if (registerLink) registerLink.style.display = 'none';
+    if (registerPanel) registerPanel.style.display = 'block';
+}
+
+function showGuestLogin(event) {
+    if (event) event.preventDefault();
+    const loginForm = document.getElementById('login-form');
+    const registerPanel = document.getElementById('guest-registration-panel');
+    const registerLink = document.getElementById('guest-register-link');
+    if (loginForm) loginForm.style.display = 'block';
+    if (registerPanel) registerPanel.style.display = 'none';
+    if (registerLink) registerLink.style.display =
+        document.getElementById('login-role')?.value?.toLowerCase() === 'guest' ? 'block' : 'none';
+}
+
+async function handleGuestRegister(event) {
+    event.preventDefault();
+    const name = document.getElementById('register-name')?.value.trim() || '';
+    const email = document.getElementById('register-email')?.value.trim() || '';
+    const password = document.getElementById('register-password')?.value || '';
+    const confirmPassword = document.getElementById('register-confirm-password')?.value || '';
+
+    if (password.length < 8) {
+        showFeedbackAlert("Your password must contain at least 8 characters.", "Close", null, false);
+        return;
+    }
+    if (password !== confirmPassword) {
+        showFeedbackAlert("The passwords do not match. Please try again.", "Close", null, false);
+        return;
+    }
+
+    try {
+        const result = await apiRequest('/Auth/register', 'POST', { name, email, password });
+        const loggedUser = {
+            userId: result.userId,
+            user_id: result.userId,
+            name: result.name,
+            email: result.email,
+            role: 'guest'
+        };
+        state.currentUser = loggedUser;
+        localStorage.setItem('hotelix_user', JSON.stringify(loggedUser));
+        localStorage.removeItem('hotelix_token');
+        showFeedbackAlert("Your Guest account has been created successfully!", "Continue", () => {
+            window.location.href = 'guest.html';
+        }, true);
+    } catch (error) {
+        console.error("Guest registration failed:", error);
+        showFeedbackAlert(error.message || "Unable to create your account. Please try again.", "Close", null, false);
+    }
+}
+
 // INDEX PAGE BOOKING FUNCTIONS
 // ==========================================================================
 
