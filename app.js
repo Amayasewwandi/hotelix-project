@@ -5,7 +5,7 @@
 
 // 1. Configuration Constants (Environment / Base URL management)
 const CONFIG = {
-    API_BASE_URL: window.ENV_API_URL || 'Server=mysql-hotelix01db-amayanethmi729-5e0d.j.aivencloud.com;Port=15680;Database=defaultdb;Uid=avnadmin;Password=;SslMode=Required;'
+    API_BASE_URL: window.ENV_API_URL || 'http://hotelixbackend-production.up.railway.app/api'
 };
 
 // Helper for API requests with enhanced security checks
