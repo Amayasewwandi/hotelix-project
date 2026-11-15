@@ -549,7 +549,7 @@ async function renderAdminRooms() {
                     <td>$${room.price ?? 150}</td>
                     <td><span class="status-badge ${(room.status || 'Available').toLowerCase()}">${room.status || 'Available'}</span></td>
                     <td>
-                        <button class="btn-table-action delete" onclick="deleteRoom(${room.room_id || room.id || index})"><i class="fa-solid fa-trash"></i> Delete</button>
+                        <button class="btn-table-action delete" onclick="deleteRoom(${room.roomId || room.room_id || room.id || index})"><i class="fa-solid fa-trash"></i> Delete</button>
                     </td>
                 </tr>
             `).join('');
