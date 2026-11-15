@@ -193,7 +193,7 @@
                 <input type="hidden" id="edit-room-index">
                 <div class="form-group">
                     <label for="room-form-no">Room Number</label>
-                    <input type="text" id="room-form-no" class="modal-input" placeholder="e.g. 104" required>
+                    <input type="number" id="room-form-no" class="modal-input" placeholder="Enter a unique numeric room ID" min="1" step="1" required>
                 </div>
                 <div class="form-group">
                     <label for="room-form-type">Room Type</label>
@@ -228,11 +228,11 @@
                 <input type="hidden" id="edit-staff-index">
                 <div class="form-group">
                     <label for="staff-form-id">Order ID</label>
-                    <input type="text" id="staff-form-id" class="modal-input" placeholder="e.g. ORD-1001" required>
+                    <input type="text" id="staff-form-id" class="modal-input" placeholder="Generated automatically" disabled>
                 </div>
                 <div class="form-group">
                     <label for="staff-form-name">Guest ID</label>
-                    <input type="text" id="staff-form-name" class="modal-input" placeholder="e.g. G-204" required>
+                    <input type="number" id="staff-form-name" class="modal-input" placeholder="Optional existing Guest ID" min="1" step="1">
                 </div>
                 <div class="form-group">
                     <label for="staff-form-desig">Service Type</label>
