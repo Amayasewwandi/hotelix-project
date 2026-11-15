@@ -46,7 +46,7 @@
                 <form id="login-form" onsubmit="handleLogin(event)">
                     <div class="form-group">
                         <label for="login-role">Select Role <i class="fa-solid fa-circle-question"></i></label>
-                        <select id="login-role" class="login-input-field" required>
+                        <select id="login-role" class="login-input-field" required onchange="toggleGuestRegistration()">
                             <option value="guest" selected>Guest</option>
                             <option value="staff">Staff</option>
                             <option value="admin">Admin</option>
@@ -76,6 +76,39 @@
                         <button type="submit" class="btn-login-submit">Login</button>
                     </div>
                 </form>
+
+                <p id="guest-register-link" style="text-align:center; margin-top:18px;">
+                    New to Hotelix? <a href="#" onclick="showGuestRegistration(event)" style="color:#b08d57; font-weight:600;">Create a Guest Account</a>
+                </p>
+
+                <section id="guest-registration-panel" style="display:none; margin-top:22px; border-top:1px solid #e5e5e5; padding-top:20px;">
+                    <h3 style="margin-bottom:8px;">Create your Guest Account</h3>
+                    <p style="margin-bottom:16px; color:#777;">Register once to book rooms and request hotel services.</p>
+                    <form id="guest-registration-form" onsubmit="handleGuestRegister(event)">
+                        <div class="form-group">
+                            <label for="register-name">Full Name</label>
+                            <input type="text" id="register-name" class="login-input-field" placeholder="Your full name" minlength="2" maxlength="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-email">Email Address</label>
+                            <input type="email" id="register-email" class="login-input-field" placeholder="you@example.com" maxlength="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Create Password</label>
+                            <input type="password" id="register-password" class="login-input-field" placeholder="At least 8 characters" minlength="8" maxlength="128" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-confirm-password">Confirm Password</label>
+                            <input type="password" id="register-confirm-password" class="login-input-field" placeholder="Enter your password again" minlength="8" maxlength="128" required>
+                        </div>
+                        <div class="login-footer-actions">
+                            <button type="submit" class="btn-login-submit">Create Guest Account</button>
+                        </div>
+                    </form>
+                    <p style="text-align:center; margin-top:14px;">
+                        Already registered? <a href="#" onclick="showGuestLogin(event)" style="color:#b08d57; font-weight:600;">Back to Login</a>
+                    </p>
+                </section>
             </div>
         </div>
     </div>
@@ -95,5 +128,3 @@
     <script src="app.js?v=4"></script>
 </body>
 </html>
-```[cite: 13, 17]
-
