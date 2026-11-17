@@ -321,7 +321,7 @@ async function handleGuestRegister(event) {
 // INDEX PAGE BOOKING FUNCTIONS
 // ==========================================================================
 
-async function initiateBooking(roomId, roomName, price) {
+async async function initiateBooking(roomId, roomName, price) {
     if (typeof roomId === 'string' && typeof roomName === 'number') {
         price = roomName;
         roomName = roomId;
