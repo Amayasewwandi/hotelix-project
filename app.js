@@ -555,6 +555,15 @@ async function renderAdminDashboard() {
     today.setHours(0, 0, 0, 0);
     const activeStatuses = ['confirmed', 'pending', 'booked'];
 
+    // Only count bookings that refer to a room returned by the Rooms API.
+    // This prevents orphaned/invalid booking room IDs from inflating occupancy.
+    const validRoomIds = new Set(
+        state.rooms
+            .filter(room => room && typeof room === 'object')
+            .map(room => Number(room.roomId ?? room.room_id ?? room.id))
+            .filter(id => Number.isInteger(id) && id > 0)
+    );
+
     const currentlyBookedRoomIds = new Set(
         state.bookings.filter(bk => {
             const status = String(bk.status || '').toLowerCase();
@@ -563,10 +572,12 @@ async function renderAdminDashboard() {
             checkIn.setHours(0, 0, 0, 0);
             checkOut.setHours(0, 0, 0, 0);
             return activeStatuses.includes(status) && checkIn <= today && checkOut > today;
-        }).map(bk => Number(bk.roomId ?? bk.room_id)).filter(id => Number.isInteger(id) && id > 0)
+        })
+        .map(bk => Number(bk.roomId ?? bk.room_id))
+        .filter(id => Number.isInteger(id) && id > 0 && validRoomIds.has(id))
     );
 
-    const totalRooms = state.rooms.length;
+    const totalRooms = validRoomIds.size;
     const bookedRooms = currentlyBookedRoomIds.size;
     const availableRooms = Math.max(0, totalRooms - bookedRooms);
 
